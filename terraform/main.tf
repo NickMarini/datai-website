@@ -1,30 +1,34 @@
-# Centralised naming — add new resources to this map.
-# Each value gets "-dev" or "-prod" appended automatically.
 locals {
-  env = var.environment
-  name = {
-    docker_repo = "datai-apps-${var.environment}"
-  }
+  env             = terraform.workspace
+  hosting_site_id = "datai-portfolio-${local.env}"
 }
 
-# 1. Enable necessary GCP APIs automatically
+# 1. Enable Core APIs (Safe to execute across both workspaces)
 resource "google_project_service" "services" {
   for_each = toset([
-    "run.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "cloudbuild.googleapis.com",
+    "firebase.googleapis.com",
+    "firebasehosting.googleapis.com",
     "iam.googleapis.com"
   ])
+  provider           = google-beta
   service            = each.key
   disable_on_destroy = false
 }
 
-# 2. Create the Docker Repository
-resource "google_artifact_registry_repository" "docker_repo" {
-  location      = var.region
-  repository_id = local.name["docker_repo"]
-  description   = "Docker repository for datai.ch applications (${local.env})"
-  format        = "DOCKER"
+# 2. Initialize Firebase on the GCP Project 
+# SINGLETON: Only the 'prod' workspace execution handles this project-level resource
+resource "google_firebase_project" "default" {
+  count      = local.env == "prod" ? 1 : 0
+  provider   = google-beta
+  project    = var.project_id
+  depends_on = [google_project_service.services]
+}
 
+# 3. Create Environment-Isolated Hosting Sites
+# Each workspace manages ONLY its own infrastructure target
+resource "google_firebase_hosting_site" "portfolio_site" {
+  provider   = google-beta
+  project    = var.project_id
+  site_id    = local.hosting_site_id
   depends_on = [google_project_service.services]
 }
