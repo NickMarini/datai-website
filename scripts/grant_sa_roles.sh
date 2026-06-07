@@ -32,9 +32,10 @@ SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 ROLES=(
 
   "roles/storage.admin"                 # Read/write GCS buckets (build artefacts, static assets)
+  "roles/serviceusage.serviceUsageAdmin" # Manage service usage (enable/disable APIs)
   "roles/firebasehosting.admin"       # Manage Firebase Hosting sites and releases
   "roles/firebase.admin"             # Manage Firebase projects and resources (e.g., to link hosting to the project)
-  
+
 )
 
 # ==============================================================================

@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "datai-core"
+  },
+  "targets": {
+    "datai-core": {
+      "hosting": {
+        "dev": [
+          "datai-portfolio-dev"
+        ],
+        "prod": [
+          "datai-portfolio-prod"
+        ]
+      }
+    }
   }
 }
