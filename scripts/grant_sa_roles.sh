@@ -19,7 +19,8 @@ set -e
 # 1. Configuration (must match setup_wif.sh)
 # ==============================================================================
 PROJECT_ID="datai-core"  # Update this to match the project used in setup_wif.sh
-SA_NAME="<SA_NAME>"  # Update this to match the SA_NAME used in setup_wif.sh (e.g., datai-website-deployer)
+REPO_NAME="datai-website"  # Update this to match the repository name used in setup_wif.sh
+SA_NAME="${REPO_NAME}-deployer"   # Update this to match the SA_NAME used in setup_wif.sh (e.g., datai-website-deployer)
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 # ==============================================================================
@@ -29,16 +30,11 @@ SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 # Each entry is:   "roles/<role>"   # reason
 # ==============================================================================
 ROLES=(
-  "roles/run.admin"                     # Deploy and manage Cloud Run services
-  "roles/artifactregistry.writer"       # Push Docker images to Artifact Registry
-  "roles/storage.admin"                 # Read/write GCS buckets (build artefacts, static assets)
-  "roles/cloudbuild.builds.builder"     # Submit Cloud Build jobs
-  "roles/iam.serviceAccountUser"        # Allow SA to act-as itself when deploying Cloud Run
-  "roles/secretmanager.secretAccessor"  # Read secrets at deploy time
 
-  # Cloud SQL (PostgreSQL)
-  "roles/cloudsql.client"               # Connect to Cloud SQL instances via Auth Proxy or direct
-  "roles/cloudsql.instanceUser"         # Authenticate to Cloud SQL databases using IAM auth
+  "roles/storage.admin"                 # Read/write GCS buckets (build artefacts, static assets)
+  "roles/firebasehosting.admin"       # Manage Firebase Hosting sites and releases
+  "roles/firebase.admin"             # Manage Firebase projects and resources (e.g., to link hosting to the project)
+  
 )
 
 # ==============================================================================

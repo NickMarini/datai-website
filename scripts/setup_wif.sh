@@ -18,7 +18,7 @@ set -e
 # ==============================================================================
 PROJECT_ID="datai-core"  # GCP project where the SA and WIF resources will be created
 GITHUB_ORG="NickMarini"  # GitHub username or organization that owns the repository
-REPO_NAME="<REPO_NAME>"  # GitHub repository name
+REPO_NAME="datai-website"  # GitHub repository name
 
 # Derived variables
 GITHUB_REPO="${GITHUB_ORG}/${REPO_NAME}"

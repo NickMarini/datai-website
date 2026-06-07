@@ -10,7 +10,7 @@ set -e
 # ==============================================================================
 PROJECT_ID="datai-core"
 REGION="europe-west6"       # Zurich
-REPO_NAME="<REPO_NAME>"   # Change this for each new repository
+REPO_NAME="datai-website"   # Change this for each new repository
 
 # Standardized bucket naming convention
 BUCKET_NAME="datai-state-${PROJECT_ID}-${REPO_NAME}"
