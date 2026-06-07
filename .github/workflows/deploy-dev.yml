@@ -38,4 +38,4 @@ jobs:
 
       - name: Deploy Frontend to Dev Site
         run: |
-          firebase deploy --only hosting --site datai-portfolio-dev --project ${{ vars.GCP_PROJECT_ID }}
+          firebase deploy --only hosting:dev --project ${{ vars.GCP_PROJECT_ID }}
