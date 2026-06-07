@@ -1,0 +1,54 @@
+name: Deploy Prod
+
+on:
+  # Auto-deploy prod on every push to main
+  #push:
+  #  branches:
+  #    - main
+  # Also runnable manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    name: "Terraform Apply [prod]"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+        service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.7.0
+
+    - name: Terraform Init
+      run: terraform init -backend-config="prefix=terraform/state/prod"
+
+    - name: Terraform Format Check
+      run: terraform fmt -check
+
+    - name: Terraform Plan
+      run: |
+        terraform plan \
+          -var="project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var="region=${{ vars.GCP_REGION }}" \
+          -var="environment=prod" \
+          -out=tfplan
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+

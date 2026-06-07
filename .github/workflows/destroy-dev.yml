@@ -1,0 +1,58 @@
+name: Destroy Dev
+
+on:
+  # Manual-only — requires typing "destroy" to confirm intent
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to confirm teardown of all dev resources'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    name: "Terraform Destroy [dev]"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+    # Fail fast if the user did not type the confirmation word
+    - name: Confirm Destroy Intent
+      if: github.event.inputs.confirm != 'destroy'
+      run: |
+        echo "ERROR: Confirmation required. Re-run and type 'destroy' in the confirm field."
+        exit 1
+
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+        service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.7.0
+
+    # Load only the dev state — prod state is never touched by this workflow
+    - name: Terraform Init
+      run: terraform init -backend-config="prefix=terraform/state/dev"
+
+    - name: Terraform Plan Destroy
+      run: |
+        terraform plan -destroy \
+          -var="project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var="region=${{ vars.GCP_REGION }}" \
+          -var="environment=dev" \
+          -out=tfplan-destroy
+
+    - name: Terraform Destroy
+      run: terraform apply -auto-approve tfplan-destroy
